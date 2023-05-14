@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+
+contract FunctionTypes{
+
+    uint internal value=5;
+
+    function FuncViewTest() internal view returns(uint) {
+        return value + 6;
+    }
+
+    function FuncPureTest(uint x, uint y) internal pure returns(uint) {
+        return x*y;
+    }
+
+    function FuncPayableTest(uint ValueEther) public payable {
+        value += ValueEther * 1 ether;
+    }
+
+}
+
+contract DerivedContract is FunctionTypes {
+    function see_Value() public view returns(uint){
+        return super.FuncViewTest();
+    }
+}
