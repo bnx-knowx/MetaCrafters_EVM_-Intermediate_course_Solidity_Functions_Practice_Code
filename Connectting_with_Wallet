@@ -1,0 +1,70 @@
+import React, {useState} from 'react'
+import {ethers} from 'ethers'
+import './WalletCard.css'
+
+const WalletCard = () => {
+
+    const [errorMessage,setErrorMessage] = useState("It seems everything is alright. Hence, Good Day (^_^)");
+    const [defaultAccount,setDefaultAccount] = useState("Your account is set to Spectaculer");
+    const [walletBallace,setWalletBallance] = useState("Your Wallet is full of Flies");
+    const [connButtonText,setConnButtonText] = useState("Let's Connect Wallet");
+    
+    const connectWalletHandler = () => {
+        if (window.ethereum && window.ethereum.isMetaMask){
+            console.log("MetaMask Is Here!");
+
+            window.ethereum.request({ method: 'eth_requestAccounts'})
+            .then(fetched_data => {
+                setConnButtonText("Connected Successfully");
+                accountHandeler(fetched_data[0]);
+            })
+            .catch(error => {
+                setErrorMessage(error.message.inMetaMask);
+            });
+        } else {
+            console.log('Need to install MetaMask');
+            setErrorMessage('Please Install MetaMask browser extentsion to interact');
+        }
+    }
+    
+    //update account , will cause components re-render
+    const accountHandeler = (newAccount) => {
+        setDefaultAccount(newAccount);
+        getAccountBallaceHandeler(newAccount.toString());
+    }
+
+	const getAccountBallaceHandeler = (account) => {
+		window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
+        .then( featched_ballance => {
+            setWalletBallance(ethers.utils.formatEther(featched_ballance));
+        })
+        .catch(ballance_featch_error => {
+            setErrorMessage(ballance_featch_error.message);
+        });
+    }
+    
+    const chainChangedhandeler = () => {
+        //reload the page to avoid any errors with chain change middle of use of the application
+        window.location.reload();
+    }
+    //Listen for account changes
+    window.ethereum.on('accountsChanged',accountHandeler);
+    
+    window.ethereum.on('chainChained',chainChangedhandeler);
+
+    return (
+        <div className='walletCard'>
+            <h4>{"Connect MetaMask"}</h4>
+            <button onClick={connectWalletHandler}>{connButtonText}</button>
+            <div className='accountDisplay'>
+                <h3>Address : {defaultAccount}</h3>
+            </div>
+            <div className='balcanceDisplay'>
+                <h3>Ballance: {walletBallace} </h3>
+            </div>
+            {errorMessage}
+        </div>
+    );
+}
+
+export default WalletCard;
